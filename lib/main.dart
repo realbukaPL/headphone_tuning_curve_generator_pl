@@ -85,7 +85,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
   bool volumeWarningSnackBarDisplayed = false;
   bool frequencyWarningSnackBarDisplayed = false;
-
+  bool appPlaybackNotificationDisplayed = false;
 
   // booleans for animated control buttons
   bool tapAnimationPlus = true;
@@ -311,7 +311,11 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     //show Android notification "app is active in background" - requested by users. 
     // This also is a workaround for playback state management bug whilst in background
     if (!kIsWeb) {
-      Future(createNotification);
+
+      !appPlaybackNotificationDisplayed ? Future(createNotification) : null;
+
+      appPlaybackNotificationDisplayed = true;
+      print(appPlaybackNotificationDisplayed);
     }
   }
 
@@ -321,6 +325,64 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       instancePlayback?.release();
     });
     instancePlayback?.release();
+  }
+
+
+//void for channel button
+  void _left() {
+    setState(() {
+      previewGraphList = curveStateListLeft;
+      graphPreviewColor = Colors.lightGreen.shade800;
+      graphPreviewColor2 = Colors.lightGreenAccent.shade400;
+      channel = 'L';
+      _flagL = true;
+      _flagC = false;
+      _flagR = false;
+      areChannelsSeparated = true;
+    });
+  }
+
+//void for channel button
+  void _center() {
+    setState(() {
+      previewGraphList = curveStateList;
+      graphPreviewColor = Colors.grey.shade800;
+      graphPreviewColor2 = Colors.black;
+      channel = 'C';
+      _flagL = false;
+      _flagC = true;
+      _flagR = false;
+      areChannelsSeparated = false;
+    });
+  }
+
+//void for channel button
+  void _right() {
+    setState(() {
+      previewGraphList = curveStateListRight;
+      graphPreviewColor = Colors.deepOrange.shade900;
+      graphPreviewColor2 = Colors.deepOrangeAccent.shade200;
+      channel = 'R';
+      _flagL = false;
+      _flagC = false;
+      _flagR = true;
+      areChannelsSeparated = true;
+    });
+  }
+
+
+  void muteToggle() async {
+    if (isMuteSelected[0] == true) {
+      isMuteSelected[0] = false;
+      isMuteSelected[1] = true;
+      playback();
+      appPlaybackNotificationDisplayed = false;
+    } else {
+      isMuteSelected[0] = true;
+      isMuteSelected[1] = false;
+      playbackStop();
+      appPlaybackNotificationDisplayed = true;
+    }
   }
 
 //this checks what channel you are on to set the correct channel volume starting point whilst using controllers
@@ -599,50 +661,6 @@ class _AppState extends State<App> with TickerProviderStateMixin {
                   ]),
             ));
   }
-
-
-//void for channel button
-  void _left() {
-    setState(() {
-      previewGraphList = curveStateListLeft;
-      graphPreviewColor = Colors.lightGreen.shade800;
-      graphPreviewColor2 = Colors.lightGreenAccent.shade400;
-      channel = 'L';
-      _flagL = true;
-      _flagC = false;
-      _flagR = false;
-      areChannelsSeparated = true;
-    });
-  }
-
-//void for channel button
-  void _center() {
-    setState(() {
-      previewGraphList = curveStateList;
-      graphPreviewColor = Colors.grey.shade800;
-      graphPreviewColor2 = Colors.black;
-      channel = 'C';
-      _flagL = false;
-      _flagC = true;
-      _flagR = false;
-      areChannelsSeparated = false;
-    });
-  }
-
-//void for channel button
-  void _right() {
-    setState(() {
-      previewGraphList = curveStateListRight;
-      graphPreviewColor = Colors.deepOrange.shade900;
-      graphPreviewColor2 = Colors.deepOrangeAccent.shade200;
-      channel = 'R';
-      _flagL = false;
-      _flagC = false;
-      _flagR = true;
-      areChannelsSeparated = true;
-    });
-  }
-
 
   Future<void> _writePreset(String waveletFile) async {
 //Generates .txt files for presets - Wavelet format for Android and
@@ -1112,18 +1130,6 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             ],
           ),
     );
-  }
-
-  void muteToggle() async {
-    if (isMuteSelected[0] == true) {
-      isMuteSelected[0] = false;
-      isMuteSelected[1] = true;
-      playback();
-    } else {
-      isMuteSelected[0] = true;
-      isMuteSelected[1] = false;
-      playbackStop();
-    }
   }
 
 
