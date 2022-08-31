@@ -166,8 +166,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
   //instruction page number indicator list
   //change the page number when adding instruction pages
-  var listPageNumberBool = List.filled(17, false);
-  final listPage = List<int>.generate(17, (i) => i++);
+  var listPageNumberBool = List.filled(5, false);
+  final listPage = List<int>.generate(5, (i) => i++);
 
   late final TabController _tabController;
 
@@ -236,7 +236,17 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       duration: Duration(seconds: 3)
   );
 
-  //TODO images are a draft. Would be awesome to have them made better
+List <Widget> startMessage=const [
+  Text(" Upewnij się, żeby na spokojnie przeczytać Instrukcje"),
+  SizedBox(height: 10),
+  Text("Po więcej informacji zapraszamy na nasz fanpage"),
+  SizedBox(height: 10),
+  Text(
+  " Aplikacja podczas działania korzysta z powiadomienia o odtwarzaniu w tle, przechodząc dalej wyrażasz zgodę"),
+  ];
+
+
+
 
   final instructionsImgList = [
     "assets/pictures/mainlove.bmp",
@@ -244,18 +254,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     "assets/pictures/freq2.bmp",
     "assets/pictures/freq4.bmp",
     "assets/pictures/copyresults.bmp",
-    "assets/pictures/recommended.bmp",
-    "assets/pictures/goodEQ31.bmp",
-    "assets/pictures/presets2.bmp",
-    "assets/pictures/focus2.bmp",
-    "assets/pictures/preview.gif",
-    "assets/pictures/extremes2.bmp",
-    "assets/pictures/stereo.gif",
-    "assets/pictures/tips.bmp",
-    "assets/pictures/results2.bmp",
-    "assets/pictures/results2.bmp",
-    "assets/pictures/focus2.bmp",
-    "assets/pictures/mainlove.bmp"
+
   ];
 
 
@@ -263,23 +262,12 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   //TODO would be awesome to have them translated in languages other than polish and english
 
   final instructionsTextList = [
-    "Nie potrzebujesz drogiego sprzętu, żeby kompletnie odmienić swoje słuchanie muzyki. Wystarczy jedynie 10 minut (i trochę cierpliwości), żeby nastroić swoje słuchawki i w pełni cieszyć się ich ukrytym potencjałem",
-    "Podstawy: Każdy dźwięk, który słyszysz, jest opisany przez swoje spektrum częstotliwości.  Equalizer to aplikacja, które pozwala na ustawienie głośności względem różnych przedziałów częstotliowści - barwę dźwięku",
-    "Podstawy: W tym przykładzie, korektor graficzny (equalizer - EQ) jest użyty do zmniejszenia głośności basu (np. gitary basowej) i jednocześnie do zwiększenia głośności dla talerzy perkusji. Gitara akustyczna, bedąc pomiędzy 100Hz i 1400Hz byłaby raczej niezmieniona - rozumiesz, o co chodzi",
-    "W dużym skrócie, jeśli chodzi o słuchawki: współczesny sprzęt, pomimo dość dobrej rozdzielczości (\"czystości brzmienia\" ), w 90% ma poważne kłopoty z nastrojeniem barwy.",
-    "Za pomocą tej aplikacji stwórz idealną krzywą strojenia dla twoich słuchawek. Skopiuj wyniki do twojego ulubionego equalizera i korzystaj z nich na codzień. Ta App to narzędzie do ustawiania EQ, nie jest equalizerem samym w sobie.",
-    "Jeśli chodzi o Androida, zdecydowanie polecam obejrzeć: Wavelet, Poweramp albo SpotEQ31.  Jeśli to wszystko jest dla ciebie nowe - po prostu ściągnij Wavelet. Nie jestem autorem tego oprogramowania i nie jestem w żaden sposób związany z żadnym z nich.",
-    "Wszystkie 5, 7 czy 10-puktowe equalizery i \"Bass boostery\", które można znaleźć w sklepie Play, do niczego się nie nadają. ",
-    "Istnieją duże różnice pomiędzy różnymi modelami słuchawek, anatomią kanału słuchowego każdego z nas i szeregu innych czynników. Jedno ustawienie, idealne dla Ciebie, może brzmieć dziwnie dla inngo użytkownika ",
-    "Zacznijmy ustawiać krzywą strojenia! Jeśli masz włączony EQ, wyłącz go, i ustaw systemową głośność na ~80%. Wyłącz wyciszenie w lewym górnym rogu aplikacji. Podłacz słuchawki bezpośrednio do urządzenia",
-    "Zaczynając od 1000Hz, korzystając ze strzałek przemieszczaj się w lewo i w prawo. Używając + i - ustaw wszystkie punkty tak, aby ich ODCZUWALNA głośność była dla wszystkich taka sama. Dla ułatwienia możesz skorzystać z szumu jako punktu odniesienia. Nie zmieniaj skrajnych częstotliowści zaznaczonych na czerwono",
-    "Jeśli komplenie nie słyszysz sygnału, pozostaw punkt na 0! Nie wzmacniaj kompletnie niesłyszalnych sygnałów. Postaraj się nie zwiększać głośności powyżej 6dB - lepiej skupić się na ściszeniu zbyt głośnych sygnałów",
-    "Zaawansowane equalizery pozwalają na ustawianie osobno kanałów lewego i prawego, jeśli odczuwasz taką potrzebę.",
-    "Wiele użytkowników nosi dokanałowe słuchawki w sposób nieprawidłowy, co powoduje słabą izolację dźwięków otoczenia i zbyt płytką aplikację do ucha, czego skutkiem są ściszone skraje spektrum. Jeśli widzisz takie rezultaty- poeksperymentuj z różnymi końcówkami (gumkami) zanim zwiększysz głośność ",
-    "Jeśli Twoja krzywa jest gotowa, wejdź w Wyniki. Pierwsza opcja to wygenerowanie presetu dla aplikacji Wavelet. Po zapisaniu, otwórz Wavelet i przejdź do trybu\"AutoEQ\". Opcja Import pozwoli ci odnaleźć w folderze Pobrane Twój preset. Następnie wybierz \"Model słuchawek\", zaznacz swoją krzywą i włącz EQ. Gotowe!",
-    "Alternatywnie możesz ręcznie skopiować wyniki do każdej innej aplikacji za pomocą wykresu albo tabeli. Nie przejmuj się, jeśli przepisując wyniki nie zachowasz idelanej precyzji",
-    "Niniejsza aplikacja jest zaprojektowana dla audiofili-amatorów i początkujacych entuzjastów jakościowego brzemienia, aby rozpocząć ich przygodę z equalizerami. Moją intencją jest zapewnić Tobie zachęcające wyniki, jednocześnie nie komplikując procesu dużą szczegółowością. Miej więc świadomość limitacji tego oprogramowania",
-    "Jeśli podoba Ci się ta apka - dodaj nas na Facebooku",
+    "Strojenie słuchawek (ustawienie korektora EQ) proponowaną tutaj metodą zajmuje 5 minut i zapewnia zdecydowany, pozytywny efekt dla słuchawek z niższej i średniej półki jakosciowej",
+    "Zmierz profil swojego słyszenia - ustaw suwaki głośności tak, żeby sygnał na każdej częstotliwości był takiej samej odczuwalnej głośności. Postaraj się subiektywnie ocenić moc sygnału - niektóre częstotliwości są naturalnie nieprzyjemne w odbiorze",
+    "Jeśli robisz to po raz pierwszy, pomiń ustawianie skrajnych częstotliwości (zaznaczonych na czerwono). Nie wzmacniaj też sygnałów, których wcale nie słyszysz. Po zaawansowane instrukcje zapraszam na fanpage naszego projektu",
+    "Aplikacja nie jest korektorem samym w sobie! Przenieś wyniki do swojego ulubionego EQ aby korzystać z nich na codzień. Wygeneruj preset do programu Wavelet, lub ręcznie przenieś wyniki do innego programu. Aby uzyskać racjonalny wynik korzystaj z EQ mającego ponad 30 punktów korekcji",
+    "Skonfiguruj swój wybrany korektor i ciesz się neutralnym, czystrzym dźwiękiem. Eksperymentuj z uzyskanymi wynikami i nie zapomnij podzielić się doświadczeniem w dyskusji na naszym fanpage!",
+
   ];
 
   String footerText = 'Check out our Twitter and Youtube channel';
@@ -927,21 +915,11 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         context: context,
         builder: (_) =>
             AlertDialog(
-                title: const Text('Stwórz swoją krzywą strojenia słuchawek'),
+                title: const Text('Stwórz Twoją krzywą korektora słuchawek'),
                 content: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: const <Widget>[
-
-                      Text(
-                          " Upewnij się, żeby przeczytać Instrukcje"),
-                      SizedBox(height: 10),
-                      !kIsWeb ?
-                      Text(
-                          " App korzysta z powiadomienia o odtwarzaniu w tle, wymagana jest zgoda użytkownika")
-                          : Text(
-                          "Dla urządzeń mobilnych polecamy wersję Android"),
-                    ]),
+                    children: startMessage),
                 actions: [
                   Center(
                       child: OutlinedButton(
