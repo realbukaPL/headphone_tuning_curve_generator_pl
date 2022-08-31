@@ -20,7 +20,7 @@ import 'dart:convert' show utf8;
 void main() async {
   if (!kIsWeb) {
     AwesomeNotifications().initialize(
-      'resource://drawable/res_notification_app_icon',
+      null,
       [NotificationChannel(
           channelKey: 'basic_channel',
           channelName: 'Basic Notifications',
@@ -315,7 +315,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       !appPlaybackNotificationDisplayed ? Future(createNotification) : null;
 
       appPlaybackNotificationDisplayed = true;
-      print(appPlaybackNotificationDisplayed);
+
     }
   }
 
