@@ -1,4 +1,4 @@
-name: free_headphone_tuning_curve_pl
+name: tune_your_headphones
 description: Krzywa strojenia słuchawek
 
 # The following line prevents the package from being accidentally published to
@@ -40,12 +40,13 @@ dependencies:
   js: ^0.6.3
 
 flutter_icons:
-  android: "launcher_icon"
+  image_path: "pictures/icon.bmp"
+  android: true
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/app_icon.png"
-  adaptive_icon_background: "assets/app_icon_background.png"
-  adaptive_icon_foreground: "assets/app_icon_foreground.png"
+
+  adaptive_icon_background: "pictures/icon.bmp"
+  adaptive_icon_foreground: "pictures/icon.bmp"
 
 
 dev_dependencies:

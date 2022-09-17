@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:free_headphone_tuning_curve_pl/notificationHandler.dart';
+import 'package:tune_your_headphones/notificationHandler.dart';
 import 'dart:ui' as ui;
 import 'dart:io' as io
 
@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'FrequencyLists.dart';
-import 'dart:convert' show utf8;
+import 'package:flutter/services.dart';
 
 
 //TODO libraries dart:js and dart:html cannot be loaded into Android as they are - a fix would be nice
@@ -26,7 +26,7 @@ void main() async {
           channelName: 'Basic Notifications',
           defaultColor: Colors.grey,
           importance: NotificationImportance.High,
-          channelShowBadge: true,
+          channelShowBadge: false,
           channelDescription: 'Media player controller',
           playSound: false
       )
@@ -249,11 +249,11 @@ List <Widget> startMessage=const [
 
 
   final instructionsImgList = [
-    "assets/pictures/mainlove.bmp",
-    "assets/pictures/freq.bmp",
-    "assets/pictures/freq2.bmp",
-    "assets/pictures/freq4.bmp",
-    "assets/pictures/copyresults.bmp",
+    "assets/pictures/icon.bmp",
+    "assets/pictures/preview.gif",
+    "assets/pictures/icon.bmp",
+    "assets/pictures/icon.bmp",
+    "assets/pictures/icon.bmp",
 
   ];
 
@@ -266,7 +266,7 @@ List <Widget> startMessage=const [
     "Zmierz profil swojego słyszenia - ustaw suwaki głośności tak, żeby sygnał na każdej częstotliwości był takiej samej odczuwalnej głośności. Postaraj się subiektywnie ocenić moc sygnału - niektóre częstotliwości są naturalnie nieprzyjemne w odbiorze",
     "Jeśli robisz to po raz pierwszy, pomiń ustawianie skrajnych częstotliwości (zaznaczonych na czerwono). Nie wzmacniaj też sygnałów, których wcale nie słyszysz. Po zaawansowane instrukcje zapraszam na fanpage naszego projektu",
     "Aplikacja nie jest korektorem samym w sobie! Przenieś wyniki do swojego ulubionego EQ aby korzystać z nich na codzień. Wygeneruj preset do programu Wavelet, lub ręcznie przenieś wyniki do innego programu. Aby uzyskać racjonalny wynik korzystaj z EQ mającego ponad 30 punktów korekcji",
-    "Skonfiguruj swój wybrany korektor i ciesz się neutralnym, czystrzym dźwiękiem. Eksperymentuj z uzyskanymi wynikami i nie zapomnij podzielić się doświadczeniem w dyskusji na naszym fanpage!",
+    "Skonfiguruj swój wybrany korektor i ciesz się neutralnym, czystszym dźwiękiem. Eksperymentuj z uzyskanymi wynikami i nie zapomnij podzielić się doświadczeniem w dyskusji na naszym fanpage!",
 
   ];
 
@@ -661,10 +661,6 @@ List <Widget> startMessage=const [
 //ignore Android storage permissions for web version
     bool storagePermission = !kIsWeb ? await Permission.manageExternalStorage
         .isGranted : true;
-    var maxVolumeValuePreset = -curveStateList.reduce((curr, next) =>
-    curr > next
-        ? curr
-        : next);
 
 
 //generate file for Wavelet - on Android
@@ -674,7 +670,6 @@ List <Widget> startMessage=const [
     //it is crucial as primitive code generates frequency list of values for Wavelet (127) proportionally to the generator list set (36)
     //Imagine it as drawing lines from each point of the generator values, then knowing that Wavelet graph looks the same, but just has
     //more points on each line you can easily calculate any point on the curve
-
     //last value has a little bug but at the last frequency, but after consideration I left it, as
     // the very high frequencies (18k+) tend to drop drastically in volume either way and 100% of users had some sort of a boost in this region.
     // Moreover user is instructed not to create sharp nor drastic changes in this region and in testing it had no audible impact on result
@@ -735,12 +730,7 @@ List <Widget> startMessage=const [
     //TODO Not used in android APP, but maybe it would be nice to have the ability to generate the PC (Equalizer APO) curve from Android?
     // files only for Equalizer APO (WEB)
 
-    String presetAPOData = "Preamp: $maxVolumeValuePreset\n  Device: all\n GraphicEQ:" +
-        curveStateList.toString()
-            .replaceAll(',', '')
-            .replaceAll('[', '')
-            .replaceAll("]", "");
-    final presetAPO = utf8.encode(presetAPOData);
+
 
 
     if (storagePermission == false) {
@@ -1110,26 +1100,33 @@ List <Widget> startMessage=const [
     );
   }
 
-
   @override
   initState() {
     super.initState();
-    //start muted
+    //start muted and in stereo
     isMuteSelected = [true, false];
-    //start in stereo
     _center();
     //start at 910 Hz and move forward to 1000 Hz (hack to initialize selected vertical line bold)
     frequencySliderValue = 12;
     _next();
-    //for instructions
     listPageNumberBool[0] == true;
     _tabController = TabController(length: listPage.length, vsync: this);
     Future(welcomeMessage);
 
 //initialize notification
-    AwesomeNotifications().actionStream.listen((event) {
-      muteToggle();
+    AwesomeNotifications().actionStream.listen((notificationEvent) {
+      if(notificationEvent.buttonKeyPressed == 'mute'){
+        muteToggle();
+        AwesomeNotifications().cancelAll();
+      }
+      if(notificationEvent.buttonKeyPressed == 'exit'){
+        muteToggle();
+        AwesomeNotifications().cancelAll();
+        SystemNavigator.pop();
+      }
     });
+
+
   }
 
   @override
@@ -1358,6 +1355,7 @@ List <Widget> startMessage=const [
                                       onPressed: (_) {
                                         setState(() {
                                           muteToggle();
+                                          AwesomeNotifications().cancelAll();
                                         });
                                       },
                                       color: Colors.grey.shade400,
