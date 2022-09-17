@@ -1,11 +1,5 @@
-<<<<<<<<< Temporary merge branch 1
-name: Tuned
-description: Stwórz swoją krzywą strojenia słuchawek
-
-=========
 name: tune_your_headphones
-description: Krzywa strojenia słuchawek
->>>>>>>>> Temporary merge branch 2
+description: Stwórz swoją krzywą strojenia słuchawek
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
