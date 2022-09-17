@@ -8,10 +8,11 @@ if (dart.library.html) 'dart:html';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'FrequencyLists.dart';
 
 import 'package:flutter/services.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 
 //TODO libraries dart:js and dart:html cannot be loaded into Android as they are - a fix would be nice
@@ -272,7 +273,7 @@ List <Widget> startMessage=const [
 
   ];
 
-  String footerText = 'Check out our Twitter and Youtube channel';
+  String footerText = 'Zapraszamy na nasz kanał Youtube' ;
 
 
   //Methods:
@@ -657,7 +658,7 @@ List <Widget> startMessage=const [
     // Equalizer APO for Web (windows), then shows up pop-up window
 
     var filenameWavelet = 'WaveletPreset';
-    final myController = TextEditingController(text: 'MojPreset');
+    final myController = TextEditingController();
     filenameWavelet = myController.text;
     final waveletFileGenerator = List<dynamic>.generate(128, (e) => e++);
 //ignore Android storage permissions for web version
@@ -765,6 +766,7 @@ List <Widget> startMessage=const [
                         GestureDetector(
                             onTap: () {
                               if (!kIsWeb) {
+                                filenameWavelet = myController.text;
                                 final io.File file = io.File(
                                     '/storage/emulated/0/Download/$filenameWavelet.txt');
                                 file.writeAsString(waveletFileGenerator
@@ -784,8 +786,7 @@ List <Widget> startMessage=const [
                                                 MainAxisAlignment.spaceAround,
                                                 children: <Widget>[
                                                   Text(
-                                                      "Próba zapisu do folderu \"Pobrane\": "
-                                                          'Download/$filenameWavelet.txt'),
+                                                      "Próba zapisu do folderu \"Pobrane\":$filenameWavelet.txt"),
                                                   const SizedBox(height: 8),
                                                   const Text(
                                                       "Jeśli nie możesz odnaleźć pliku, skopiuj całość pola poniżej do notatnika i zapisz jako plik .txt"),
@@ -811,7 +812,7 @@ List <Widget> startMessage=const [
                                 //                                html.Blob(<List<int>>[presetAPO]),
                                 //                                '$filenameWavelet.txt'
                                 //                               ]);
-                                myController.clear();
+                             //   myController.clear();
                               }
                             },
                             child: AnimatedContainer(
@@ -1891,14 +1892,20 @@ List <Widget> startMessage=const [
                         .size
                         .height - 600).abs() / 6
                 ),
-                Container(height: 30,
+                 Column(
+                      children: <Widget>[
+                 const Text("Zajrzyj na:"),
+                        GestureDetector(
+                      child: const Text("Nasz kanał Youtube", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                      onTap: () async {
+                        const url = 'https://www.youtube.com/channel/UCd3U_XYS1wxc17HZgZ3IOcw';
+                        launchUrlString(url);
+                      },
+                    ),]
 
-                  color: greyTone2,
-                  child: Center(
-                    child: Text(footerText),
                   ),
 
-                )
+
               ]),
 
 

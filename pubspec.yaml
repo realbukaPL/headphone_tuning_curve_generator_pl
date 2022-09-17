@@ -19,8 +19,9 @@ dependencies:
   awesome_notifications: ^0.6.21
   font_awesome_flutter: ^10.1.0
   flutter_launcher_icons: ^0.10.0
-  http: ^0.13.4
-  js: ^0.6.3
+  url_launcher: ^6.1.5
+  #http: ^0.13.4
+  #js: ^0.6.3
 
 flutter_icons:
   image_path: "assets/pictures/icon.png"
