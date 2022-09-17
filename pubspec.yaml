@@ -18,16 +18,16 @@ dependencies:
   permission_handler: ^9.2.0
   awesome_notifications: ^0.6.21
   font_awesome_flutter: ^10.1.0
-  flutter_launcher_icons: ^0.9.3
+  flutter_launcher_icons: ^0.10.0
   http: ^0.13.4
   js: ^0.6.3
 
 flutter_icons:
-  image_path: "pictures/icon.png"
+  image_path: "assets/pictures/icon.png"
   android: true
 
-  adaptive_icon_background: "pictures/icon.png"
-  adaptive_icon_foreground: "pictures/icon.png"
+  adaptive_icon_background: "assets/pictures/icon.png"
+  adaptive_icon_foreground: "assets/pictures/icon.png"
 
 
 dev_dependencies:
