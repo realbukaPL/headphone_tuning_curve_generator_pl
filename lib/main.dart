@@ -783,9 +783,8 @@ List <Widget> startMessage=const [
                                                 mainAxisAlignment:
                                                 MainAxisAlignment.spaceAround,
                                                 children: <Widget>[
-                                                  Text(
-                                                      "Próba zapisu do folderu \"Pobrane\": "
-                                                          'Download/$filenameWavelet.txt'),
+                                                  const Text(
+                                                      "Próba zapisu do folderu \"Pobrane\": "),
                                                   const SizedBox(height: 8),
                                                   const Text(
                                                       "Jeśli nie możesz odnaleźć pliku, skopiuj całość pola poniżej do notatnika i zapisz jako plik .txt"),
