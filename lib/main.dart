@@ -11,7 +11,6 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'FrequencyLists.dart';
 import 'package:flutter/services.dart';
 
-
 //TODO libraries dart:js and dart:html cannot be loaded into Android as they are - a fix would be nice
 //import "dart:js" as js;
 //import 'dart:html' as html;
