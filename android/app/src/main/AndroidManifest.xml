@@ -4,11 +4,12 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
    <application
        android:requestLegacyExternalStorage="true"
-       android:label="free_headphone_tuning_curve_pl"
+       android:label="tune_your_headphones"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

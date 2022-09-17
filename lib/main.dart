@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'FrequencyLists.dart';
 
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 
 
 //TODO libraries dart:js and dart:html cannot be loaded into Android as they are - a fix would be nice
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Headphone Tuning App',
+      title: 'Tune your headphones',
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
@@ -254,9 +254,9 @@ List <Widget> startMessage=const [
   final instructionsImgList = [
     "assets/pictures/icon.bmp",
     "assets/pictures/preview.gif",
-    "assets/pictures/icon.bmp",
-    "assets/pictures/icon.bmp",
-    "assets/pictures/icon.bmp",
+    "assets/pictures/confused.bmp",
+    "assets/pictures/veryhappy.bmp",
+    "assets/pictures/facebook.bmp",
 
   ];
 
@@ -268,12 +268,10 @@ List <Widget> startMessage=const [
     "Strojenie słuchawek (ustawienie korektora EQ) proponowaną tutaj metodą zajmuje 5 minut i zapewnia zdecydowany, pozytywny efekt dla słuchawek z niższej i średniej półki jakosciowej",
     "Zmierz profil swojego słyszenia - ustaw suwaki głośności tak, żeby sygnał na każdej częstotliwości był takiej samej odczuwalnej głośności. Postaraj się subiektywnie ocenić moc sygnału - niektóre częstotliwości są naturalnie nieprzyjemne w odbiorze",
     "Jeśli robisz to po raz pierwszy, pomiń ustawianie skrajnych częstotliwości (zaznaczonych na czerwono). Nie wzmacniaj też sygnałów, których wcale nie słyszysz. Po zaawansowane instrukcje zapraszam na fanpage naszego projektu",
-    "Aplikacja nie jest korektorem samym w sobie! Przenieś wyniki do swojego ulubionego EQ aby korzystać z nich na codzień. Wygeneruj preset do programu Wavelet, lub ręcznie przenieś wyniki do innego programu. Aby uzyskać racjonalny wynik korzystaj z EQ mającego ponad 30 punktów korekcji",
-    "Skonfiguruj swój wybrany korektor i ciesz się neutralnym, czystszym dźwiękiem. Eksperymentuj z uzyskanymi wynikami i nie zapomnij podzielić się doświadczeniem w dyskusji na naszym fanpage!",
+    "Aplikacja nie jest korektorem samym w sobie! Przenieś wyniki do swojego ulubionego EQ aby korzystać z nich na codzień. Wygeneruj preset do programu Wavelet, lub ręcznie przenieś wyniki do innego programu. Aby uzyskać dobre wyniki korzystaj z EQ mającego ponad 30 punktów korekcji",
+    "Skonfiguruj swój wybrany korektor i ciesz się neutralnym, czystszym dźwiękiem. Eksperymentuj z uzyskanymi wynikami i nie zapomnij podzielić się doświadczeniem w dyskusji na naszym fanpage! Program przeznaczony jest dla osób zaczynających swoją przygodę z korektorami audio.",
 
   ];
-
-  String footerText = 'Zapraszamy na nasz kanał Youtube' ;
 
 
   //Methods:
@@ -488,6 +486,9 @@ List <Widget> startMessage=const [
     return preGainValue.toInt();
   }
 
+  Future sleepSecond() {
+    return Future.delayed(const Duration(seconds: 1), () => "1");
+  }
 
 //pop-up window with results for parametric EQ (the table of EQ values)
   void parametricEQResults() {
@@ -661,7 +662,8 @@ List <Widget> startMessage=const [
     final myController = TextEditingController();
     filenameWavelet = myController.text;
     final waveletFileGenerator = List<dynamic>.generate(128, (e) => e++);
-//ignore Android storage permissions for web version
+
+
     bool storagePermission = !kIsWeb ? await Permission.manageExternalStorage
         .isGranted : true;
 
@@ -1125,6 +1127,7 @@ List <Widget> startMessage=const [
       if(notificationEvent.buttonKeyPressed == 'exit'){
         muteToggle();
         AwesomeNotifications().cancelAll();
+        sleepSecond();
         SystemNavigator.pop();
       }
     });
@@ -1734,12 +1737,7 @@ List <Widget> startMessage=const [
                                 child:
                                 const Center(child: Icon(Icons.remove))),
                           )),
-                      SizedBox(
-                          height: (MediaQuery
-                              .of(context)
-                              .size
-                              .height - 600).abs() / 6
-                      ),
+                      spacerBox(context, 10),
 
                       Expanded(
                         flex: 9,
@@ -1831,23 +1829,13 @@ List <Widget> startMessage=const [
                     ],
                   ),
                 ]),
-                SizedBox(
-                    height: (MediaQuery
-                        .of(context)
-                        .size
-                        .height - 600).abs() / 6
-                ),
+                spacerBox(context, 10),
                 const Divider(
                   height: 10,
                   thickness: 2,
                   color: Colors.blueGrey,
                 ),
-                SizedBox(
-                    height: (MediaQuery
-                        .of(context)
-                        .size
-                        .height - 600).abs() / 6
-                ),
+                spacerBox(context, 10),
                 Row(children: <Widget>[
                   const Text(
                     "Szum: ",
@@ -1886,12 +1874,7 @@ List <Widget> startMessage=const [
                     isSelected: isNoiseSelected,
                   ),
                 ]),
-                SizedBox(
-                    height: (MediaQuery
-                        .of(context)
-                        .size
-                        .height - 600).abs() / 6
-                ),
+                spacerBox(context, 10),
                  Column(
                       children: <Widget>[
                  const Text("Zajrzyj na:"),
@@ -1901,7 +1884,16 @@ List <Widget> startMessage=const [
                         const url = 'https://www.youtube.com/channel/UCd3U_XYS1wxc17HZgZ3IOcw';
                         launchUrlString(url);
                       },
-                    ),]
+                    ),
+                        GestureDetector(
+                          child: const Text("Nasz fanpage na Facebook", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                          onTap: () async {
+                            const url = 'https://www.facebook.com/profile.php?id=100085544545155';
+                            launchUrlString(url);
+                          },
+                        ),
+                        spacerBox(context, 10),
+                      ]
 
                   ),
 
