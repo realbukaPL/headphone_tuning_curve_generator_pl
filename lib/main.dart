@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'FrequencyLists.dart';
-import 'dart:convert' show utf8;
+
 
 
 //TODO libraries dart:js and dart:html cannot be loaded into Android as they are - a fix would be nice
@@ -661,10 +661,6 @@ List <Widget> startMessage=const [
 //ignore Android storage permissions for web version
     bool storagePermission = !kIsWeb ? await Permission.manageExternalStorage
         .isGranted : true;
-    var maxVolumeValuePreset = -curveStateList.reduce((curr, next) =>
-    curr > next
-        ? curr
-        : next);
 
 
 //generate file for Wavelet - on Android
@@ -674,7 +670,6 @@ List <Widget> startMessage=const [
     //it is crucial as primitive code generates frequency list of values for Wavelet (127) proportionally to the generator list set (36)
     //Imagine it as drawing lines from each point of the generator values, then knowing that Wavelet graph looks the same, but just has
     //more points on each line you can easily calculate any point on the curve
-
     //last value has a little bug but at the last frequency, but after consideration I left it, as
     // the very high frequencies (18k+) tend to drop drastically in volume either way and 100% of users had some sort of a boost in this region.
     // Moreover user is instructed not to create sharp nor drastic changes in this region and in testing it had no audible impact on result
@@ -735,12 +730,7 @@ List <Widget> startMessage=const [
     //TODO Not used in android APP, but maybe it would be nice to have the ability to generate the PC (Equalizer APO) curve from Android?
     // files only for Equalizer APO (WEB)
 
-    String presetAPOData = "Preamp: $maxVolumeValuePreset\n  Device: all\n GraphicEQ:" +
-        curveStateList.toString()
-            .replaceAll(',', '')
-            .replaceAll('[', '')
-            .replaceAll("]", "");
-    final presetAPO = utf8.encode(presetAPOData);
+
 
 
     if (storagePermission == false) {
@@ -1114,14 +1104,12 @@ List <Widget> startMessage=const [
   @override
   initState() {
     super.initState();
-    //start muted
+    //start muted and in stereo
     isMuteSelected = [true, false];
-    //start in stereo
     _center();
     //start at 910 Hz and move forward to 1000 Hz (hack to initialize selected vertical line bold)
     frequencySliderValue = 12;
     _next();
-    //for instructions
     listPageNumberBool[0] == true;
     _tabController = TabController(length: listPage.length, vsync: this);
     Future(welcomeMessage);
@@ -1130,6 +1118,8 @@ List <Widget> startMessage=const [
     AwesomeNotifications().actionStream.listen((event) {
       muteToggle();
     });
+
+
   }
 
   @override

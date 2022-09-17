@@ -7,9 +7,9 @@ await AwesomeNotifications().createNotification(
       content: NotificationContent(
           id: 2,
           channelKey: 'basic_channel',
-          body: 'App odtwarza dźwięk w tle',
+          body: 'Aplikacja odtwarza dźwięk w tle',
           notificationLayout: NotificationLayout.Default,
-
+        autoDismissible: true,
       ),
           actionButtons: [NotificationActionButton(key: "key", label: "Wycisz")]
   );
