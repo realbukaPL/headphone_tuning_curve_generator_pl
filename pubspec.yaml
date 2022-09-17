@@ -1,10 +1,13 @@
+<<<<<<<<< Temporary merge branch 1
+name: Tuned
+description: Stwórz swoją krzywą strojenia słuchawek
+
+=========
 name: tune_your_headphones
 description: Krzywa strojenia słuchawek
+>>>>>>>>> Temporary merge branch 2
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
 
 version: 1.0.0+1
 

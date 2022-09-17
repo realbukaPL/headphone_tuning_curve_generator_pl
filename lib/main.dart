@@ -9,7 +9,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'FrequencyLists.dart';
+<<<<<<<<< Temporary merge branch 1
+
+=========
 import 'package:flutter/services.dart';
+>>>>>>>>> Temporary merge branch 2
+
 
 //TODO libraries dart:js and dart:html cannot be loaded into Android as they are - a fix would be nice
 //import "dart:js" as js;
