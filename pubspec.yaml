@@ -23,13 +23,11 @@ dependencies:
   js: ^0.6.3
 
 flutter_icons:
-  image_path: "pictures/icon.bmp"
+  image_path: "pictures/icon.png"
   android: true
-  ios: true
-  remove_alpha_ios: true
 
-  adaptive_icon_background: "pictures/icon.bmp"
-  adaptive_icon_foreground: "pictures/icon.bmp"
+  adaptive_icon_background: "pictures/icon.png"
+  adaptive_icon_foreground: "pictures/icon.png"
 
 
 dev_dependencies:
