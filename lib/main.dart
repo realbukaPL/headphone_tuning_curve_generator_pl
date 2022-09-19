@@ -10,7 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'FrequencyLists.dart';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 
 
@@ -37,6 +37,8 @@ void main() async {
     );
 
     runApp(const MyApp());
+
+
   }}
 
 class MyApp extends StatelessWidget {
@@ -96,49 +98,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   bool tapAnimForward = true;
   bool tapAnimPrevious = true;
 
-  //audioPlayers package instancePlaybacks (sound and noise) initiation
-  //playerId set to '1' to prevent memory bugs
-  AudioCache audioCache = AudioCache(fixedPlayer: AudioPlayer(playerId: '1'));
-  dynamic instancePlayback;
-  dynamic instancePlayback2;
 
-//control sliders state initiation
-  double frequencySliderValue = 13;
-  double frequencyVolumeSet = 0;
-  double noiseVolume = 0.6;
-
-//AudioPlayers package initiation for white noise; low_latency mode prevents the loop clipping
-  static AudioPlayer noisePlayer = AudioPlayer(mode: PlayerMode.LOW_LATENCY);
-  static AudioCache playerNoise = AudioCache(fixedPlayer: noisePlayer);
-
-
-  //Center/L/R buttons initiation
-  String channel = 'C';
-
-  //preview graph variable colors 
-  var graphPreviewColor = Colors.grey.shade800;
-  var graphPreviewColor2 = Colors.black;
-
-  //preview graph
-  double iconSize = 10.0;
-  double iconSize2 = 10.0;
-  double lineThickness = 1.0;
-  double lineThickness2 = 3.0;
-
-  //buttons and background color
-  final greyTone1 = Colors.grey[100];
-
-  //greyTone2 is also MaterialAPP's Scaffold background color
-  final greyTone2 = Colors.grey[200];
-  final greyTone3 = Colors.grey[400];
-  final textColor = Colors.black;
-  final rightButtonTone = const Color.fromRGBO(
-      255, 170, 170, 0.3);
-  final leftButtonTone = const Color.fromRGBO(
-      170, 255, 170, 0.3);
-
-
-  //lists initiation - for 3 preview graphs, for main graph, for wavelet file generator
   var curveStateList = List<int>.filled(36, 0);
   var curveStateListCompensated = List<int>.filled(36, 0);
   final list36 = List<dynamic>.generate(36, (i) => i++);
@@ -148,32 +108,34 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   var graphDrawingListSeparateChannels = List<int>.filled(72, 0);
   var previewGraphList = List<int>.filled(36, 0);
   var waveletListGenerator = [];
-
+  final lineListHorizontal = List<int>.generate(36, (i) => i++);
+  final lineListVertical = List<int>.generate(11, (i) => i++);
+  
   final double graphHeight = 180;
   double buttonHeight = 40;
 
-  final lineListHorizontal = List<int>.generate(36, (i) => i++);
-  final lineListVertical = List<int>.generate(11, (i) => i++);
 
+  //Center/L/R buttons initiation
+  String channel = 'C';
 
-  //it suggest the user not to touch certain frequencies
-  List<int> redFrequencies = const [0, 32, 33, 34, 35];
+  
 
-//volume slider init
-  double setVolumeSlider = 0;
+  //preview graph
+  double iconSize = 10.0;
+  double iconSize2 = 10.0;
+  double lineThickness = 1.0;
+  double lineThickness2 = 3.0;
 
-  //instructions
+  //buttons, colors, shades
+  final greyTone1 = Colors.grey[100];
 
-  final instructionStyle = const TextStyle(color: Colors.white, fontSize: 16);
-  final instructionsController = PageController();
-
-  //instruction page number indicator list
-  //change the page number when adding instruction pages
-  var listPageNumberBool = List.filled(5, false);
-  final listPage = List<int>.generate(5, (i) => i++);
-
-  late final TabController _tabController;
-
+  final greyTone2 = Colors.grey[200];
+  final greyTone3 = Colors.grey[400];
+  final textColor = Colors.black;
+  final rightButtonTone = const Color.fromRGBO(
+      255, 170, 170, 0.3);
+  final leftButtonTone = const Color.fromRGBO(
+      170, 255, 170, 0.3);
 
   List <BoxShadow>buttonShadow =
   [BoxShadow(
@@ -219,6 +181,24 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     ),
   ];
 
+  TextStyle menuButtonStyle =  TextStyle(
+    fontSize: 14,
+    shadows: const <Shadow>[
+      Shadow(
+        offset: Offset(-0.5, 0.5),
+        blurRadius: 3.0,
+        color: Colors.white,
+      ),
+      Shadow(
+        offset: Offset(0.5, -0.5),
+        blurRadius: 3.0,
+        color: Colors.white,
+      )], color: Colors.grey.shade800,
+  );
+
+BorderRadius defaultEdge = BorderRadius.circular(10);
+Duration defaultAnimationDuration = const Duration(milliseconds: 200);
+  
   Widget spacerBox(BuildContext context, int notSmallerThan) {
     return SizedBox(
         height: ([(notSmallerThan + (MediaQuery
@@ -228,6 +208,31 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         curr < next ? curr : next)).toDouble()
     );
   }
+//preview graph variable colors 
+  var graphPreviewColor = Colors.grey.shade800;
+  var graphPreviewColor2 = Colors.black;
+
+
+  //it suggest the user not to touch certain frequencies
+  List<int> redFrequencies = const [0, 32, 33, 34, 35];
+
+//volume slider init
+  double setVolumeSlider = 0;
+
+  //instructions
+
+  final instructionStyle = const TextStyle(color: Colors.white, fontSize: 16);
+  final instructionsController = PageController();
+
+  //instruction page number indicator list
+  //change the page number when adding instruction pages
+  var listPageNumberBool = List.filled(5, false);
+  final listPage = List<int>.generate(5, (i) => i++);
+
+  late final TabController _tabController;
+
+  
+
 
   final volumeWarningSnackBar = const SnackBar(
       content: Text('Niezalecane, by ustawiać korekcję większą niż +6dB'),
@@ -273,6 +278,16 @@ List <Widget> startMessage=const [
 
   ];
 
+  final signalPlayer = AudioPlayer(playerId: "1");
+  final noisePlayer = AudioPlayer(playerId: "2");
+
+  double frequencySliderValue = 13;
+  double frequencyVolumeSet = 0;
+  double noiseVolume = 0.6;
+
+
+
+
 
   //Methods:
 //signal playback
@@ -280,25 +295,28 @@ List <Widget> startMessage=const [
   //TODO I've assumed that 100mb of .wav files are acceptable + I did not want to dwell into signal generators
   //TODO It would probably be better to generate signal programmatically
 
-  void playback() async {
-    audioCache = AudioCache(fixedPlayer: AudioPlayer(playerId: '1'));
+  void play() async {
+    await signalPlayer.stop();
 
-
-    instancePlayback?.release();
     if (isMuteSelected[1] == true) {
-      instancePlayback = await audioCache.loop("30/" +
+      await signalPlayer.setSource(AssetSource("30/" +
           (frequencySliderValue).round().toString() +
           channel +
           (((previewGraphList[frequencySliderValue.round()] + 10) / 2) + 1)
               .round()
               .toString() +
-          '.wav');
-      await instancePlayback.setVolume(1.0);
+          '.wav'));
+      signalPlayer.setReleaseMode(ReleaseMode.loop);
+      signalPlayer.resume();
     } else {
       null;
     }
-    //show Android notification "app is active in background" - requested by users. 
-    // This also is a workaround for playback state management bug whilst in background
+  }
+  //play + show Android notification "app is active in background"
+  void playback() async {
+
+  play();
+
     if (!kIsWeb) {
 
       !appPlaybackNotificationDisplayed ? Future(createNotification) : null;
@@ -311,9 +329,9 @@ List <Widget> startMessage=const [
 //  stop playback
   void playbackStop() {
     setState(() {
-      instancePlayback?.release();
+      signalPlayer.release();
     });
-    instancePlayback?.release();
+    signalPlayer.stop();
   }
 
 
@@ -388,8 +406,8 @@ List <Widget> startMessage=const [
 
 //"next" frequency button
   void _next() async {
-    instancePlayback?.release();
 
+    signalPlayer.release();
     setState(() {
       if (frequencySliderValue.round() < 35) {
         frequencySliderValue++;
@@ -398,23 +416,11 @@ List <Widget> startMessage=const [
       setFrequency[frequencySliderValue.round()] = true;
     });
 
-    if (isMuteSelected[1] == true) {
-      instancePlayback = await audioCache.loop("30/" +
-          frequencySliderValue.round().toString() +
-          channel +
-          (((previewGraphList[frequencySliderValue.round()] + 10) / 2) + 1)
-              .round()
-              .toString() +
-          '.wav');
-      await instancePlayback.setVolume(1.0);
-    } else {
-      null;
-    }
+    play();
   }
 
 //"prev" frequency button
   void _prev() async {
-    instancePlayback?.release();
 
     setState(() {
       if (frequencySliderValue.round() > 0) {
@@ -424,21 +430,10 @@ List <Widget> startMessage=const [
       setFrequency[frequencySliderValue.round()] = true;
     });
 
-    if (isMuteSelected[1] == true) {
-      instancePlayback = await audioCache.loop("30/" +
-          frequencySliderValue.round().toString() +
-          channel +
-          (((previewGraphList[frequencySliderValue.round()] + 10) / 2) + 1)
-              .round()
-              .toString() +
-          '.wav');
-      await instancePlayback.setVolume(1.0);
-    } else {
-      null;
-    }
+    play();
   }
 
-  void noiseMuteButton(int index2) {
+noiseMuteButton(int index2) async {
     setState(() {
       for (int buttonIndex2 = 0;
       buttonIndex2 < isNoiseSelected.length;
@@ -449,13 +444,17 @@ List <Widget> startMessage=const [
           isNoiseSelected[buttonIndex2] = false;
         }
       }
+      });
       if (isNoiseSelected[0] == false) {
-        playerNoise.fixedPlayer?.stop();
-        playerNoise.loop("30/noise.wav", volume: noiseVolume);
+        await noisePlayer.stop();
+        noisePlayer.setVolume(noiseVolume);
+        noisePlayer.setSource(AssetSource("30/noise.wav"));
+        noisePlayer.setReleaseMode(ReleaseMode.loop);
+        noisePlayer.resume();
       } else {
-        playerNoise.fixedPlayer?.stop();
+        await noisePlayer.stop();
       }
-    });
+
   }
 
 
@@ -818,12 +817,12 @@ List <Widget> startMessage=const [
                               }
                             },
                             child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
+                                duration:  defaultAnimationDuration,
                                 height: 40,
                                 width: 100,
                                 decoration: BoxDecoration(
                                   color: greyTone1,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: defaultEdge,
                                   boxShadow: buttonShadow,
                                 ),
                                 child: Center(
@@ -858,7 +857,7 @@ List <Widget> startMessage=const [
 
   //EQ memory list logic
   void _stanEQ() {
-    instancePlayback?.release();
+    signalPlayer.release();
 
     if (_flagC == true) {
       curveStateList.setAll(
@@ -931,6 +930,42 @@ List <Widget> startMessage=const [
                 ]));
   }
 
+  Future<String> get _localDocumentsPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+stateSave() async {
+  final documentsPath = await _localDocumentsPath;
+  final file = io.File('$documentsPath/tuneYourHeadphones.txt');
+
+  return file.writeAsString( curveStateList.toString().replaceAll('[', '').replaceAll(']', ', ') + curveStateListLeft.toString().replaceAll('[', '').replaceAll(']', ', ') + curveStateListRight.toString().replaceAll('[', '').replaceAll(']', ''));
+}
+
+stateLoad() async {
+
+    try {
+      final documentsPath = await _localDocumentsPath;
+      final file = io.File('$documentsPath/tuneYourHeadphones.txt');
+
+      // Read the file
+      final  contents = await file.readAsString();
+final List loadedList =contents.replaceAll(" ", "").split(',');
+      signalPlayer.stop();
+      noisePlayer.stop();
+  setState(() {
+     for (int e in list36)
+       {curveStateList[e] = int.parse(loadedList[e]);
+      curveStateListLeft[e] = int.parse(loadedList[36+e]);
+      curveStateListRight[e] = int.parse(loadedList[72+e]);
+       }
+    });
+    } catch (e) {
+      return "error";
+    }
+
+  }
 
   void _resultsWindow() async {
     final _graphScrollController = ScrollController();
@@ -956,32 +991,17 @@ List <Widget> startMessage=const [
                                 _writePreset("a");
                               },
                               child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
+                                  duration:  defaultAnimationDuration,
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: greyTone1,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: defaultEdge,
                                     boxShadow: buttonShadow,
                                   ),
                                   child: Center(
                                       child: Text(
                                         "Wygeneruj preset dla Wavelet",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          shadows: const <Shadow>[
-                                            Shadow(
-                                              offset: Offset(-0.5, 0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                            Shadow(
-                                              offset: Offset(0.5, -0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                          color: Colors.grey.shade800,
-                                        ),
+                                        style: menuButtonStyle,
                                       )))),
                           Container(height: 12),
                           GestureDetector(
@@ -1034,32 +1054,17 @@ List <Widget> startMessage=const [
                                             ],
                                           )),
                               child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
+                                  duration:  defaultAnimationDuration,
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: greyTone1,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: defaultEdge,
                                     boxShadow: buttonShadow,
                                   ),
                                   child: Center(
                                       child: Text(
                                         "Pokaż wykres krzywej",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          shadows: const <Shadow>[
-                                            Shadow(
-                                              offset: Offset(-0.5, 0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                            Shadow(
-                                              offset: Offset(0.5, -0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                          color: Colors.grey.shade800,
-                                        ),
+                                        style: menuButtonStyle,
                                       )))),
                           Container(height: 12),
                           GestureDetector(
@@ -1067,33 +1072,66 @@ List <Widget> startMessage=const [
                                 parametricEQResults();
                               },
                               child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
+                                  duration:  defaultAnimationDuration,
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: greyTone1,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: defaultEdge,
                                     boxShadow: buttonShadow,
                                   ),
                                   child: Center(
                                       child: Text(
-                                        "Pokaż tabelę wyników dla parametrycznych EQ",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          shadows: const <Shadow>[
-                                            Shadow(
-                                              offset: Offset(-0.5, 0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                            Shadow(
-                                              offset: Offset(0.5, -0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                          color: Colors.grey.shade800,
-                                        ),
+                                        "Pokaż tabelę dla parametrycznych EQ",
+                                        style: menuButtonStyle,
                                       )))),
+                          Container(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              GestureDetector(
+                                  onTap: () {
+stateSave();
+                                  },
+                                  child: AnimatedContainer(
+                                      duration:  defaultAnimationDuration,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: greyTone1,
+                                        borderRadius: defaultEdge,
+                                        boxShadow: buttonShadow,
+                                      ),
+                                      child: Center(child:
+                                        Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                          child: Text(
+                                            "Zapisz",
+                                            style: menuButtonStyle,
+                                          ))
+
+                                      ))),
+                              Container(width: 12),
+                              GestureDetector(
+                                  onTap: () {
+                                    stateLoad();
+                                  },
+                                  child: AnimatedContainer(
+                                      duration:  defaultAnimationDuration,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: greyTone1,
+                                        borderRadius: defaultEdge,
+                                        boxShadow: buttonShadow,
+                                      ),
+                                  child: Center(child:
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                          child: Text(
+                                            "Wczytaj",
+                                            style: menuButtonStyle,
+                                          ))
+
+    ))),
+                            ],
+                            
+                          )
                         ])),
                 OutlinedButton(
                   onPressed: () => Navigator.pop(context),
@@ -1125,10 +1163,11 @@ List <Widget> startMessage=const [
         AwesomeNotifications().cancelAll();
       }
       if(notificationEvent.buttonKeyPressed == 'exit'){
-        muteToggle();
+
+        signalPlayer.stop();
+         noisePlayer.stop();
+   SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop');
         AwesomeNotifications().cancelAll();
-        sleepSecond();
-        SystemNavigator.pop();
       }
     });
 
@@ -1271,11 +1310,11 @@ List <Widget> startMessage=const [
                                                             ])));
                                               })),
                               child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
+                                  duration:  defaultAnimationDuration,
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: greyTone1,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: defaultEdge,
                                     boxShadow: buttonShadow,
                                   ),
                                   child: Center(
@@ -1305,11 +1344,11 @@ List <Widget> startMessage=const [
                             child: GestureDetector(
                               onTap: () => _resultsWindow(),
                               child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
+                                  duration:  defaultAnimationDuration,
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: greyTone1,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: defaultEdge,
                                     boxShadow: buttonShadow,
                                   ),
                                   child: Center(
@@ -1344,7 +1383,7 @@ List <Widget> startMessage=const [
                                 height: 40,
                                 decoration: BoxDecoration(
                                   color: greyTone1,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: defaultEdge,
                                   boxShadow: buttonShadow,
                                 ),
                                 child: Center(
@@ -1352,7 +1391,7 @@ List <Widget> startMessage=const [
                                     child: ToggleButtons(
                                       borderWidth: 0,
                                       splashColor: Colors.white54,
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: defaultEdge,
                                       renderBorder: false,
                                       children: const <Widget>[
                                         Icon(Icons.volume_off_outlined),
@@ -1379,13 +1418,13 @@ List <Widget> startMessage=const [
                                 onTap: _center,
                                 child: AnimatedContainer(
                                     duration:
-                                    const Duration(milliseconds: 200),
+                                     defaultAnimationDuration,
                                     height: buttonHeight,
                                     decoration: BoxDecoration(
                                       color: _flagC
                                           ? Colors.white
                                           : greyTone1,
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: defaultEdge,
                                       boxShadow: !_flagC
                                           ? buttonShadow
                                           : buttonShadowReversed,
@@ -1417,13 +1456,13 @@ List <Widget> startMessage=const [
                                 onTap: _left,
                                 child: AnimatedContainer(
                                     duration:
-                                    const Duration(milliseconds: 200),
+                                     defaultAnimationDuration,
                                     height: buttonHeight,
                                     decoration: BoxDecoration(
                                       color: _flagL
                                           ? leftButtonTone
                                           : greyTone1,
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: defaultEdge,
                                       boxShadow: !_flagL
                                           ? buttonShadow
                                           : buttonShadowReversed +
@@ -1460,13 +1499,13 @@ List <Widget> startMessage=const [
                                 onTap: _right,
                                 child: AnimatedContainer(
                                     duration:
-                                    const Duration(milliseconds: 200),
+                                     defaultAnimationDuration,
                                     height: buttonHeight,
                                     decoration: BoxDecoration(
                                       color: _flagR
                                           ? rightButtonTone
                                           : greyTone1,
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: defaultEdge,
                                       boxShadow: !_flagR
                                           ? buttonShadow
                                           : buttonShadowReversed +
@@ -1568,12 +1607,12 @@ List <Widget> startMessage=const [
                   ),
                   Container(
                     alignment: Alignment(
-                        ((frequencySliderValue + 1) / 17.3) - 1.07, 0.0),
+                        ((frequencySliderValue + 1) / 16.8) - 1.1, 0.0),
                     child: const Icon(Icons.keyboard_arrow_up, size: 25),
                   ),
                   Container(
                     alignment:
-                    Alignment(((frequencySliderValue + 1) / 18) - 1, 0.0),
+                    Alignment(((frequencySliderValue + 1) / 16.8) - 1.1, 0.0),
                     child: Text(
                       frequencyRange.round().toString() + " Hz",
                       style: TextStyle(
@@ -1600,7 +1639,7 @@ List <Widget> startMessage=const [
                   ),
                 ]),
                 Column(children: <Widget>[
-                  spacerBox(context, 10),
+                  spacerBox(context, 4),
                   Row(mainAxisSize: MainAxisSize.max, children: <Widget>[
                     Expanded(
                         flex: 2,
@@ -1619,13 +1658,13 @@ List <Widget> startMessage=const [
                             tapAnimPrevious = true;
                           },
                           child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
+                              duration:  defaultAnimationDuration,
                               height: buttonHeight * 1.5,
                               decoration: BoxDecoration(
                                 color: tapAnimPrevious
                                     ? greyTone1
                                     : greyTone2,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: defaultEdge,
                                 boxShadow: tapAnimPrevious
                                     ? buttonShadow
                                     : [],
@@ -1681,7 +1720,7 @@ List <Widget> startMessage=const [
                                 color: tapAnimForward
                                     ? greyTone1
                                     : greyTone2,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: defaultEdge,
                                 boxShadow: tapAnimForward
                                     ? buttonShadow
                                     : [],
@@ -1729,7 +1768,7 @@ List <Widget> startMessage=const [
                                   color: tapAnimationMinus
                                       ? greyTone1
                                       : greyTone2,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: defaultEdge,
                                   boxShadow: tapAnimationMinus
                                       ? buttonShadow
                                       : [],
@@ -1818,7 +1857,7 @@ List <Widget> startMessage=const [
                                 color: tapAnimationPlus
                                     ? greyTone1
                                     : greyTone2,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: defaultEdge,
                                 boxShadow: tapAnimationPlus
                                     ? buttonShadow
                                     : [],
@@ -1829,13 +1868,13 @@ List <Widget> startMessage=const [
                     ],
                   ),
                 ]),
-                spacerBox(context, 10),
+                spacerBox(context, 4),
                 const Divider(
                   height: 10,
-                  thickness: 2,
+                  thickness: 1,
                   color: Colors.blueGrey,
                 ),
-                spacerBox(context, 10),
+                spacerBox(context, 2),
                 Row(children: <Widget>[
                   const Text(
                     "Szum: ",
@@ -1862,7 +1901,7 @@ List <Widget> startMessage=const [
                   ToggleButtons(
                     borderWidth: 0,
                     splashColor: Colors.white54,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: defaultEdge,
                     renderBorder: false,
                     children: const <Widget>[
                       Icon(Icons.volume_off_outlined),
@@ -1874,19 +1913,20 @@ List <Widget> startMessage=const [
                     isSelected: isNoiseSelected,
                   ),
                 ]),
-                spacerBox(context, 10),
-                 Column(
+                spacerBox(context, 4),
+                 Row(mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                 const Text("Zajrzyj na:"),
+                 const Text("Zajrzyj na nasz: "),
                         GestureDetector(
-                      child: const Text("Nasz kanał Youtube", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                      child: const Text("Youtube", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
                       onTap: () async {
                         const url = 'https://www.youtube.com/channel/UCd3U_XYS1wxc17HZgZ3IOcw';
                         launchUrlString(url);
                       },
                     ),
+                        const Text(" oraz "),
                         GestureDetector(
-                          child: const Text("Nasz fanpage na Facebook", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                          child: const Text("Facebook", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
                           onTap: () async {
                             const url = 'https://www.facebook.com/profile.php?id=100085544545155';
                             launchUrlString(url);

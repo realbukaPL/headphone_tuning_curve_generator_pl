@@ -10,7 +10,11 @@ await AwesomeNotifications().createNotification(
           notificationLayout: NotificationLayout.Default,
         autoDismissible: true,
       ),
-          actionButtons: [NotificationActionButton(key: "mute", label: "Wycisz"), NotificationActionButton(key: "exit", label: "Zakończ")]
+          actionButtons: [NotificationActionButton(key: "mute", label: "Wycisz"), NotificationActionButton(key: "exit", label: "Zakończ program")]
   );
 
 }
+
+
+@override
+bool get wantKeepAlive => true;
