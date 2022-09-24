@@ -25,7 +25,7 @@ dependencies:
   #js: ^0.6.3
 
 flutter_icons:
-  image_path: "assets/pictures/icon.png"
+  image_path: "assets/pictures/icon192.png"
   android: true
 
   adaptive_icon_background: "assets/pictures/icon.png"

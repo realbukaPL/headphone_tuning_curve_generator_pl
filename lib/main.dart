@@ -110,15 +110,12 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   var waveletListGenerator = [];
   final lineListHorizontal = List<int>.generate(36, (i) => i++);
   final lineListVertical = List<int>.generate(11, (i) => i++);
-  
+
   final double graphHeight = 180;
   double buttonHeight = 40;
-
-
-  //Center/L/R buttons initiation
   String channel = 'C';
 
-  
+
 
   //preview graph
   double iconSize = 10.0;
@@ -181,6 +178,23 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     ),
   ];
 
+  TextStyle mainButtonStyle =TextStyle(
+    fontSize: 18,
+    shadows: const <Shadow>[
+      Shadow(
+        offset: Offset(-0.5, 0.5),
+        blurRadius: 3.0,
+        color: Colors.white,
+      ),
+      Shadow(
+        offset: Offset(0.5, -0.5),
+        blurRadius: 3.0,
+        color: Colors.white,
+      ),
+    ],
+    color: Colors.grey.shade800,
+  );
+
   TextStyle menuButtonStyle =  TextStyle(
     fontSize: 14,
     shadows: const <Shadow>[
@@ -196,9 +210,21 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       )], color: Colors.grey.shade800,
   );
 
+  ButtonStyle menuButton = ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(Colors.grey[100]),
+    elevation: MaterialStateProperty.all(10.0),
+    shadowColor: MaterialStateProperty.all(Colors.black),
+    shape:MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+
+        )),
+  );
+
 BorderRadius defaultEdge = BorderRadius.circular(10);
 Duration defaultAnimationDuration = const Duration(milliseconds: 200);
-  
+Duration controllersAnimationDuration = const Duration(milliseconds: 50);
+
   Widget spacerBox(BuildContext context, int notSmallerThan) {
     return SizedBox(
         height: ([(notSmallerThan + (MediaQuery
@@ -208,7 +234,7 @@ Duration defaultAnimationDuration = const Duration(milliseconds: 200);
         curr < next ? curr : next)).toDouble()
     );
   }
-//preview graph variable colors 
+//preview graph variable colors
   var graphPreviewColor = Colors.grey.shade800;
   var graphPreviewColor2 = Colors.black;
 
@@ -216,7 +242,6 @@ Duration defaultAnimationDuration = const Duration(milliseconds: 200);
   //it suggest the user not to touch certain frequencies
   List<int> redFrequencies = const [0, 32, 33, 34, 35];
 
-//volume slider init
   double setVolumeSlider = 0;
 
   //instructions
@@ -231,7 +256,7 @@ Duration defaultAnimationDuration = const Duration(milliseconds: 200);
 
   late final TabController _tabController;
 
-  
+
 
 
   final volumeWarningSnackBar = const SnackBar(
@@ -279,6 +304,7 @@ List <Widget> startMessage=const [
   ];
 
   final signalPlayer = AudioPlayer(playerId: "1");
+
   final noisePlayer = AudioPlayer(playerId: "2");
 
   double frequencySliderValue = 13;
@@ -295,43 +321,34 @@ List <Widget> startMessage=const [
   //TODO I've assumed that 100mb of .wav files are acceptable + I did not want to dwell into signal generators
   //TODO It would probably be better to generate signal programmatically
 
-  void play() async {
-    await signalPlayer.stop();
+  void playback() async {
+
+    await signalPlayer.release();
+
 
     if (isMuteSelected[1] == true) {
-      await signalPlayer.setSource(AssetSource("30/" +
+       await signalPlayer.setSource(AssetSource("30/" +
           (frequencySliderValue).round().toString() +
           channel +
           (((previewGraphList[frequencySliderValue.round()] + 10) / 2) + 1)
               .round()
               .toString() +
           '.wav'));
-      signalPlayer.setReleaseMode(ReleaseMode.loop);
-      signalPlayer.resume();
+
+     await signalPlayer.setReleaseMode(ReleaseMode.loop);
+     await signalPlayer.resume();
+
     } else {
       null;
     }
-  }
-  //play + show Android notification "app is active in background"
-  void playback() async {
-
-  play();
 
     if (!kIsWeb) {
 
-      !appPlaybackNotificationDisplayed ? Future(createNotification) : null;
+      appPlaybackNotificationDisplayed ?  Future(createNotification): null ;
 
-      appPlaybackNotificationDisplayed = true;
+      appPlaybackNotificationDisplayed = false;
 
     }
-  }
-
-//  stop playback
-  void playbackStop() {
-    setState(() {
-      signalPlayer.release();
-    });
-    signalPlayer.stop();
   }
 
 
@@ -377,18 +394,22 @@ List <Widget> startMessage=const [
     });
   }
 
+  playerStop() async{
+
+    await signalPlayer.release();
+  }
 
   void muteToggle() async {
     if (isMuteSelected[0] == true) {
       isMuteSelected[0] = false;
       isMuteSelected[1] = true;
       playback();
-      appPlaybackNotificationDisplayed = false;
+      appPlaybackNotificationDisplayed = true;
     } else {
       isMuteSelected[0] = true;
       isMuteSelected[1] = false;
-      playbackStop();
-      appPlaybackNotificationDisplayed = true;
+      playerStop();
+      appPlaybackNotificationDisplayed = false;
     }
   }
 
@@ -405,9 +426,9 @@ List <Widget> startMessage=const [
   }
 
 //"next" frequency button
-  void _next() async {
+  void _next()  {
 
-    signalPlayer.release();
+
     setState(() {
       if (frequencySliderValue.round() < 35) {
         frequencySliderValue++;
@@ -416,11 +437,11 @@ List <Widget> startMessage=const [
       setFrequency[frequencySliderValue.round()] = true;
     });
 
-    play();
+    playback();
   }
 
 //"prev" frequency button
-  void _prev() async {
+  void _prev() {
 
     setState(() {
       if (frequencySliderValue.round() > 0) {
@@ -430,7 +451,7 @@ List <Widget> startMessage=const [
       setFrequency[frequencySliderValue.round()] = true;
     });
 
-    play();
+    playback();
   }
 
 noiseMuteButton(int index2) async {
@@ -857,7 +878,7 @@ noiseMuteButton(int index2) async {
 
   //EQ memory list logic
   void _stanEQ() {
-    signalPlayer.release();
+
 
     if (_flagC == true) {
       curveStateList.setAll(
@@ -937,11 +958,27 @@ noiseMuteButton(int index2) async {
   }
 
 stateSave() async {
-  final documentsPath = await _localDocumentsPath;
-  final file = io.File('$documentsPath/tuneYourHeadphones.txt');
+ bool localStorage = await Permission.manageExternalStorage.isGranted;
+ if (localStorage == true) {
+   final documentsPath = await _localDocumentsPath;
+   final file = io.File('$documentsPath/tuneYourHeadphones.txt');
+   showDialog(
+       context: context,
+       builder: (_) =>const AlertDialog(content:Text("Zapisano")));
+   return file.writeAsString(
+       curveStateList.toString().replaceAll('[', '').replaceAll(']', ', ') +
+           curveStateListLeft.toString().replaceAll('[', '').replaceAll(
+               ']', ', ') +
+           curveStateListRight.toString().replaceAll('[', '').replaceAll(
+               ']', ''));
 
-  return file.writeAsString( curveStateList.toString().replaceAll('[', '').replaceAll(']', ', ') + curveStateListLeft.toString().replaceAll('[', '').replaceAll(']', ', ') + curveStateListRight.toString().replaceAll('[', '').replaceAll(']', ''));
-}
+
+
+ }
+  else {Permission.manageExternalStorage.request();
+
+  }
+  }
 
 stateLoad() async {
 
@@ -960,9 +997,16 @@ final List loadedList =contents.replaceAll(" ", "").split(',');
       curveStateListLeft[e] = int.parse(loadedList[36+e]);
       curveStateListRight[e] = int.parse(loadedList[72+e]);
        }
+     showDialog(
+         context: context,
+         builder: (_) =>const AlertDialog(content:Text("Wczytano")));
+
     });
     } catch (e) {
-      return "error";
+      return
+     showDialog(
+          context: context,
+          builder: (_) =>const AlertDialog(content: Text("Błąd odczytu")));
     }
 
   }
@@ -986,151 +1030,110 @@ final List loadedList =contents.replaceAll(" ", "").split(',');
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          GestureDetector(
-                              onTap: () {
-                                _writePreset("a");
-                              },
-                              child: AnimatedContainer(
-                                  duration:  defaultAnimationDuration,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: greyTone1,
-                                    borderRadius: defaultEdge,
-                                    boxShadow: buttonShadow,
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                        "Wygeneruj preset dla Wavelet",
-                                        style: menuButtonStyle,
-                                      )))),
-                          Container(height: 12),
-                          GestureDetector(
-                              onTap: () =>
-                                  showDialog(
-                                      context: context,
-                                      builder: (_) =>
-                                          AlertDialog(
-                                            title: Text('Ustaw pre-gain na ' +
-                                                _preGain().toString() + "dB"),
-                                            shape: const RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                            scrollable: true,
-                                            content: Scrollbar(
+                          ElevatedButton(
+                              onPressed:() {
+                           _writePreset("a");},
+                              style: menuButton,
+                              child: Center(
+                                  child: Text(
+                                    "Wygeneruj preset dla Wavelet",
+                                    style: menuButtonStyle,
+                                  ))),
+
+                          ElevatedButton(
+                              onPressed:() {
+                                showDialog(
+                                    context: context,
+                                    builder: (_) =>
+                                        AlertDialog(
+                                          title: Text('Ustaw pre-gain na ' +
+                                              _preGain().toString() + "dB"),
+                                          shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(20))),
+                                          scrollable: true,
+                                          content: Scrollbar(
+                                            controller: _graphScrollController,
+                                            isAlwaysShown: true,
+                                            interactive: true,
+                                            thickness: 6,
+                                            child: SingleChildScrollView(
                                               controller: _graphScrollController,
-                                              isAlwaysShown: true,
-                                              interactive: true,
-                                              thickness: 6,
-                                              child: SingleChildScrollView(
-                                                controller: _graphScrollController,
-                                                scrollDirection: Axis
-                                                    .horizontal,
-                                                child: Column(
-                                                    children: <Widget>[
-                                                      CustomPaint(
-                                                        foregroundPainter: areChannelsSeparated
-                                                            ?
-                                                        LinePainterSeparateChannels(
-                                                            graphDrawingListSeparateChannels)
-                                                            :
-                                                        LinePainter(
-                                                            graphDrawingListStereo),
-                                                        child: const SizedBox(
-                                                            height: 260,
-                                                            width: 900),
-                                                      ),
-                                                      Container(height: 40),
-                                                    ]),
-                                              ),
+                                              scrollDirection: Axis
+                                                  .horizontal,
+                                              child: Column(
+                                                  children: <Widget>[
+                                                    CustomPaint(
+                                                      foregroundPainter: areChannelsSeparated
+                                                          ?
+                                                      LinePainterSeparateChannels(
+                                                          graphDrawingListSeparateChannels)
+                                                          :
+                                                      LinePainter(
+                                                          graphDrawingListStereo),
+                                                      child: const SizedBox(
+                                                          height: 260,
+                                                          width: 900),
+                                                    ),
+                                                    Container(height: 40),
+                                                  ]),
                                             ),
-                                            actionsAlignment: MainAxisAlignment
-                                                .center,
-                                            actions: [
-                                              OutlinedButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                child: const Text('Wstecz'),
-                                              ),
-                                            ],
-                                          )),
-                              child: AnimatedContainer(
-                                  duration:  defaultAnimationDuration,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: greyTone1,
-                                    borderRadius: defaultEdge,
-                                    boxShadow: buttonShadow,
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                        "Pokaż wykres krzywej",
-                                        style: menuButtonStyle,
-                                      )))),
-                          Container(height: 12),
-                          GestureDetector(
-                              onTap: () {
-                                parametricEQResults();
+                                          ),
+                                          actionsAlignment: MainAxisAlignment
+                                              .center,
+                                          actions: [
+                                            OutlinedButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text('Wstecz'),
+                                            ),
+                                          ],
+                                        ));
+
                               },
-                              child: AnimatedContainer(
-                                  duration:  defaultAnimationDuration,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: greyTone1,
-                                    borderRadius: defaultEdge,
-                                    boxShadow: buttonShadow,
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                        "Pokaż tabelę dla parametrycznych EQ",
-                                        style: menuButtonStyle,
-                                      )))),
-                          Container(height: 12),
+                              style: menuButton,
+                              child: Center(
+                                  child: Text(
+                                    "Pokaż wykres krzywej",
+                                    style: menuButtonStyle,
+                                  ))),
+
+                          ElevatedButton(
+                              onPressed:() {
+                                parametricEQResults();},
+                              style: menuButton,
+                              child: Center(
+                                  child: Text(
+                                    "Pokaż tabelę dla parametrycznych EQ",
+                                    style: menuButtonStyle,
+                                  ))),
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
-                              GestureDetector(
-                                  onTap: () {
-stateSave();
-                                  },
-                                  child: AnimatedContainer(
-                                      duration:  defaultAnimationDuration,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: greyTone1,
-                                        borderRadius: defaultEdge,
-                                        boxShadow: buttonShadow,
-                                      ),
-                                      child: Center(child:
-                                        Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                          child: Text(
-                                            "Zapisz",
-                                            style: menuButtonStyle,
-                                          ))
-
+                              ElevatedButton(
+                                  onPressed:() {
+                                    stateSave();},
+                                  style: menuButton,
+                                  child: Center(
+                                      child: Text(
+                                        "Zapisz",
+                                        style: menuButtonStyle,
                                       ))),
-                              Container(width: 12),
-                              GestureDetector(
-                                  onTap: () {
-                                    stateLoad();
-                                  },
-                                  child: AnimatedContainer(
-                                      duration:  defaultAnimationDuration,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: greyTone1,
-                                        borderRadius: defaultEdge,
-                                        boxShadow: buttonShadow,
-                                      ),
-                                  child: Center(child:
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                          child: Text(
-                                            "Wczytaj",
-                                            style: menuButtonStyle,
-                                          ))
 
-    ))),
+                              Container(width: 12),
+
+                              ElevatedButton(
+                                  onPressed:() {
+                                    stateLoad();},
+                                  style: menuButton,
+                                  child: Center(
+                                      child: Text(
+                                        "Wczytaj",
+                                        style: menuButtonStyle,
+                                      ))),
                             ],
-                            
+
                           )
                         ])),
                 OutlinedButton(
@@ -1146,10 +1149,9 @@ stateSave();
   @override
   initState() {
     super.initState();
-    //start muted and in stereo
-    isMuteSelected = [true, false];
+
     _center();
-    //start at 910 Hz and move forward to 1000 Hz (hack to initialize selected vertical line bold)
+    //start at 910 Hz and move forward to 1000 Hz (workaround to initialize selected vertical line bold)
     frequencySliderValue = 12;
     _next();
     listPageNumberBool[0] == true;
@@ -1159,13 +1161,21 @@ stateSave();
 //initialize notification
     AwesomeNotifications().actionStream.listen((notificationEvent) {
       if(notificationEvent.buttonKeyPressed == 'mute'){
-        muteToggle();
+
+        setState(() {
+          isMuteSelected[0] = true;
+          isMuteSelected[1] = false;
+          playerStop();
+          appPlaybackNotificationDisplayed = false;
+        });
+
+
         AwesomeNotifications().cancelAll();
       }
       if(notificationEvent.buttonKeyPressed == 'exit'){
 
-        signalPlayer.stop();
-         noisePlayer.stop();
+        signalPlayer.release();
+         noisePlayer.release();
    SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop');
         AwesomeNotifications().cancelAll();
       }
@@ -1209,169 +1219,132 @@ stateSave();
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
                         Expanded(
-                            flex: 4,
-                            child: GestureDetector(
-                              onTap: () =>
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) =>
-                                          StatefulBuilder(
-                                              builder: (context, setState) {
-                                                return Dialog(
-                                                    backgroundColor:
-                                                    const Color.fromRGBO(
-                                                        64, 64, 64, 1.0),
-                                                    insetPadding:
+                        flex: 4,
+                        child:
+                        ElevatedButton(
+                            onPressed:() {
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      StatefulBuilder(
+                                          builder: (context, setState) {
+                                            return Dialog(
+                                                backgroundColor:
+                                                const Color.fromRGBO(
+                                                    64, 64, 64, 1.0),
+                                                insetPadding:
+                                                const EdgeInsets
+                                                    .symmetric(
+                                                    horizontal: 10.0,
+                                                    vertical: 10.0),
+                                                shape: const RoundedRectangleBorder(
+                                                    borderRadius:
+                                                    BorderRadius.all(
+                                                        Radius.circular(
+                                                            20))),
+                                                child: Padding(
+                                                    padding:
                                                     const EdgeInsets
                                                         .symmetric(
-                                                        horizontal: 10.0,
+                                                        horizontal: 15.0,
                                                         vertical: 10.0),
-                                                    shape: const RoundedRectangleBorder(
-                                                        borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                20))),
-                                                    child: Padding(
-                                                        padding:
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                            horizontal: 15.0,
-                                                            vertical: 10.0),
-                                                        child: Column(
-                                                            mainAxisSize:
-                                                            MainAxisSize.max,
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceAround,
-                                                            children: <
-                                                                Widget>[
-                                                              Expanded(
-                                                                  flex: 16,
-                                                                  child: PageView(
+                                                    child: Column(
+                                                        mainAxisSize:
+                                                        MainAxisSize.max,
+                                                        mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceAround,
+                                                        children: <
+                                                            Widget>[
+                                                          Expanded(
+                                                              flex: 16,
+                                                              child: PageView(
+                                                                  controller:
+                                                                  instructionsController,
+                                                                  onPageChanged:
+                                                                      (
+                                                                      index) {
+                                                                    setState(() {
+                                                                      _tabController
+                                                                          .index =
+                                                                          index;
+                                                                    });
+                                                                  },
+                                                                  children: <
+                                                                      Widget>[
+                                                                    for (int i
+                                                                    in listPage)
+                                                                      Center(
+                                                                          child: SingleChildScrollView(
+                                                                              padding: const EdgeInsets
+                                                                                  .all(
+                                                                                  4.0),
+                                                                              child: Column(
+                                                                                  children: <
+                                                                                      Widget>[
+                                                                                    Image
+                                                                                        .asset(
+                                                                                        instructionsImgList[i]),
+                                                                                    const SizedBox(
+                                                                                        height: 20),
+                                                                                    Text(
+                                                                                        instructionsTextList[i],
+                                                                                        style: instructionStyle),
+                                                                                  ]))),
+                                                                  ])),
+                                                          Expanded(
+                                                              flex: 1,
+                                                              child: Center(
+                                                                  child: TabPageSelector(
+                                                                      indicatorSize:
+                                                                      10,
                                                                       controller:
-                                                                      instructionsController,
-                                                                      onPageChanged:
-                                                                          (
-                                                                          index) {
-                                                                        setState(() {
-                                                                          _tabController
-                                                                              .index =
-                                                                              index;
-                                                                        });
-                                                                      },
-                                                                      children: <
-                                                                          Widget>[
-                                                                        for (int i
-                                                                        in listPage)
-                                                                          Center(
-                                                                              child: SingleChildScrollView(
-                                                                                  padding: const EdgeInsets
-                                                                                      .all(
-                                                                                      4.0),
-                                                                                  child: Column(
-                                                                                      children: <
-                                                                                          Widget>[
-                                                                                        Image
-                                                                                            .asset(
-                                                                                            instructionsImgList[i]),
-                                                                                        const SizedBox(
-                                                                                            height: 20),
-                                                                                        Text(
-                                                                                            instructionsTextList[i],
-                                                                                            style: instructionStyle),
-                                                                                      ]))),
-                                                                      ])),
-                                                              Expanded(
-                                                                  flex: 1,
-                                                                  child: Center(
-                                                                      child: TabPageSelector(
-                                                                          indicatorSize:
-                                                                          10,
-                                                                          controller:
-                                                                          _tabController))),
-                                                              Expanded(
-                                                                  flex: 1,
-                                                                  child:
-                                                                  OutlinedButton(
-                                                                    onPressed: () {
-                                                                      setState(() {
-                                                                        _tabController
-                                                                            .index =
-                                                                        0;
-                                                                      });
+                                                                      _tabController))),
+                                                          Expanded(
+                                                              flex: 1,
+                                                              child:
+                                                              OutlinedButton(
+                                                                onPressed: () {
+                                                                  setState(() {
+                                                                    _tabController
+                                                                        .index =
+                                                                    0;
+                                                                  });
 
-                                                                      Navigator
-                                                                          .pop(
-                                                                          context);
-                                                                    },
-                                                                    child: const Text(
-                                                                        '✓ Zaczynajmy! '),
-                                                                  )),
-                                                            ])));
-                                              })),
-                              child: AnimatedContainer(
-                                  duration:  defaultAnimationDuration,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: greyTone1,
-                                    borderRadius: defaultEdge,
-                                    boxShadow: buttonShadow,
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                        'Instrukcje',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          shadows: const <Shadow>[
-                                            Shadow(
-                                              offset: Offset(-0.5, 0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                            Shadow(
-                                              offset: Offset(0.5, -0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                          color: Colors.grey.shade800,
-                                        ),
-                                      ))),
-                            )),
+                                                                  Navigator
+                                                                      .pop(
+                                                                      context);
+                                                                },
+                                                                child: const Text(
+                                                                    '✓ Zaczynajmy! '),
+                                                              )),
+                                                        ])));
+                                          }
+                                      )
+                              );
+                              },
+                            style: menuButton,
+                            child: Center(
+                                child: Text(
+                                  "Instrukcje",
+                                  style: mainButtonStyle,
+                                ))),
+                      ),
                         Expanded(flex: 1, child: Container()),
                         Expanded(
                             flex: 4,
-                            child: GestureDetector(
-                              onTap: () => _resultsWindow(),
-                              child: AnimatedContainer(
-                                  duration:  defaultAnimationDuration,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: greyTone1,
-                                    borderRadius: defaultEdge,
-                                    boxShadow: buttonShadow,
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                        'Wyniki',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          shadows: const <Shadow>[
-                                            Shadow(
-                                              offset: Offset(-0.5, 0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                            Shadow(
-                                              offset: Offset(0.5, -0.5),
-                                              blurRadius: 3.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                          color: Colors.grey.shade800,
-                                        ),
-                                      ))),
-                            ))
+                            child:
+                            ElevatedButton(
+                                onPressed:() {
+                                  _resultsWindow();},
+                                style: menuButton,
+                                child: Center(
+                                    child: Text(
+                                      "Wyniki",
+                                      style: mainButtonStyle,
+                                    ))),
+                        )
                       ]),
                   spacerBox(context, 10),
                   Row(
@@ -1422,7 +1395,7 @@ stateSave();
                                     height: buttonHeight,
                                     decoration: BoxDecoration(
                                       color: _flagC
-                                          ? Colors.white
+                                          ? Colors.grey[40]
                                           : greyTone1,
                                       borderRadius: defaultEdge,
                                       boxShadow: !_flagC
@@ -1658,7 +1631,7 @@ stateSave();
                             tapAnimPrevious = true;
                           },
                           child: AnimatedContainer(
-                              duration:  defaultAnimationDuration,
+                              duration:  controllersAnimationDuration,
                               height: buttonHeight * 1.5,
                               decoration: BoxDecoration(
                                 color: tapAnimPrevious
@@ -1714,7 +1687,7 @@ stateSave();
                             tapAnimForward = true;
                           },
                           child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 80),
+                              duration: controllersAnimationDuration,
                               height: buttonHeight * 1.5,
                               decoration: BoxDecoration(
                                 color: tapAnimForward
@@ -1737,6 +1710,7 @@ stateSave();
                           flex: 2,
                           child: GestureDetector(
                             onTapDown: (_) {
+
                               super.setState(() {
                                 tapAnimationMinus = false;
                               });
@@ -1762,7 +1736,7 @@ stateSave();
                               });
                             },
                             child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 80),
+                                duration: controllersAnimationDuration,
                                 height: buttonHeight * 1.5,
                                 decoration: BoxDecoration(
                                   color: tapAnimationMinus
@@ -1809,6 +1783,7 @@ stateSave();
                             max: 10,
                             divisions: 10,
                             onChanged: (double volValue) {
+
                               super.setState(
                                     () {
                                   frequencyVolumeSet = volValue;
@@ -1829,6 +1804,7 @@ stateSave();
                         child: GestureDetector(
                           onTapDown: (_) {
                             super.setState(() {
+
                               tapAnimationPlus = false;
                             });
                           },
@@ -1851,7 +1827,7 @@ stateSave();
                             });
                           },
                           child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 80),
+                              duration: controllersAnimationDuration,
                               height: buttonHeight * 1.5,
                               decoration: BoxDecoration(
                                 color: tapAnimationPlus
@@ -1932,7 +1908,7 @@ stateSave();
                             launchUrlString(url);
                           },
                         ),
-                        spacerBox(context, 10),
+                        spacerBox(context, 10)
                       ]
 
                   ),
@@ -2000,6 +1976,27 @@ class LinePainter extends CustomPainter {
     const textStyle = TextStyle(
       color: Colors.black,
       fontSize: 12,
+      shadows:[Shadow(
+        offset:
+        Offset(3.0, 3.0),
+        blurRadius: 6.0,
+        color: Colors.white,
+      ),Shadow(
+        offset:
+        Offset(-3.0, -3.0),
+        blurRadius: 6.0,
+        color: Colors.white,
+      ),Shadow(
+        offset:
+        Offset(1.5, 1.5),
+        blurRadius: 2.0,
+        color: Colors.white,
+      ),Shadow(
+        offset:
+        Offset(-1.5, -1.5),
+        blurRadius: 2.0,
+        color: Colors.white,
+      ),]
     );
 
 
@@ -2153,7 +2150,27 @@ class LinePainterSeparateChannels extends CustomPainter {
             paint2);
       }
     }
-
+final textShadows = [const Shadow(
+  offset:
+  Offset(3.0, 3.0),
+  blurRadius: 6.0,
+  color: Colors.white,
+),const Shadow(
+  offset:
+  Offset(-3.0, -3.0),
+  blurRadius: 6.0,
+  color: Colors.white,
+),const Shadow(
+  offset:
+  Offset(1.5, 1.5),
+  blurRadius: 2.0,
+  color: Colors.white,
+),const Shadow(
+  offset:
+  Offset(-1.5, -1.5),
+  blurRadius: 2.0,
+  color: Colors.white,
+),];
 
     final textStyle = TextStyle(
       color: colorStereo,
@@ -2161,13 +2178,13 @@ class LinePainterSeparateChannels extends CustomPainter {
     );
     final textStyleLeft = TextStyle(
       color: colorLeft,
-      backgroundColor: colorBackground,
+      shadows: textShadows,
       fontSize: fontRegular,
     );
 
     final textStyleRight = TextStyle(
       color: colorRight,
-      backgroundColor: colorBackground,
+      shadows: textShadows,
       fontSize: fontRegular,
     );
 
