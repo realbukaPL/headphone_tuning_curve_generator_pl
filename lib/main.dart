@@ -1972,7 +1972,6 @@ class LinePainter extends CustomPainter {
       }
     }
 
-
     const textStyle = TextStyle(
       color: Colors.black,
       fontSize: 12,
